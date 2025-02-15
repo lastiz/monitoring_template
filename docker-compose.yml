@@ -1,0 +1,65 @@
+volumes:
+  prometheus-data:
+    driver: local
+
+  grafana-data:
+    driver: local
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    volumes:
+      - ./config/prometheus,yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  # 3-rd exporters
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
+    restart: unless-stopped
+
+  openvpn_exporter:
+    image: kumina/openvpn-exporter
+    container_name: openvpn_exporter
+    command:
+      - "--openvpn.status_paths=/etc/openvpn/openvpn-status.log"
+    volumes:
+      - /var/log/openvpn/status.log:/etc/openvpn/openvpn-status.log:ro
+    restart: unless-stopped
+
+  # End of exporters
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
