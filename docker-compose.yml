@@ -5,6 +5,14 @@ volumes:
   grafana-data:
     driver: local
 
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        subnet: 172.16.0.0/16
+        gateway: 172.16.0.1
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -17,8 +25,11 @@ services:
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    networks:
+      monitoring:
+        ipv4_address: 172.16.0.2
     extra_hosts:
-      - "node_exporter:$HOST_DOCKER_LOCAL_IP"
+      - "node_exporter:172.16.0.1"
     restart: unless-stopped
 
   # 3-rd exporters
@@ -44,6 +55,8 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
     devices:
       - /dev/kmsg
     privileged: true
@@ -58,4 +71,6 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
     restart: unless-stopped
