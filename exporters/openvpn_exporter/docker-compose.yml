@@ -1,9 +1,0 @@
-services:
-  openvpn_exporter:
-    image: kumina/openvpn-exporter
-    container_name: openvpn_exporter
-    command:
-      - "--openvpn.status_paths=/etc/openvpn/openvpn-status.log"
-    volumes:
-      - ./openvpn-data/openvpn-status.log:/etc/openvpn/openvpn-status.log:ro
-    restart: unless-stopped

@@ -4,6 +4,7 @@ services:
     container_name: node_exporter
     command:
       - '--path.rootfs=/host'
+      - '--web.listen-address=127.0.0.1:9100'
     network_mode: host
     pid: host
     volumes:

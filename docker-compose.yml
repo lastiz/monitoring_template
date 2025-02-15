@@ -17,6 +17,9 @@ services:
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    extra_hosts:
+      - "traffic_monitor:$HOST_DOCKER_LOCAL_IP"
+      - "node_exporter:$HOST_DOCKER_LOCAL_IP"
     restart: unless-stopped
 
   # 3-rd exporters
@@ -26,6 +29,8 @@ services:
     container_name: node_exporter
     command:
       - '--path.rootfs=/host'
+      - '--web.listen-address=0.0.0.0:9100'
+    network_mode: host
     pid: host
     volumes:
       - '/:/host:ro,rslave'
@@ -45,15 +50,12 @@ services:
     privileged: true
     restart: unless-stopped
 
-  openvpn_exporter:
-    image: kumina/openvpn-exporter
-    container_name: openvpn_exporter
-    ports:
-      - "9176:9176"
-    command:
-      - "--openvpn.status_paths=/etc/openvpn/openvpn-status.log"
-    volumes:
-      - /var/log/openvpn/status.log:/etc/openvpn/openvpn-status.log:ro
+  network_traffic_metrics:
+    image: inzania/network-traffic-metrics:latest
+    container_name: network_traffic_metrics
+    environment:
+      - NTM_INTERFACE=${NTM_INTERFACE}
+    network_mode: host
     restart: unless-stopped
 
   # End of exporters
