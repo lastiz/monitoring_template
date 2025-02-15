@@ -1,8 +1,0 @@
-services:
-  network_traffic_metrics:
-    image: inzania/network-traffic-metrics:latest
-    container_name: network_traffic_metrics
-    environment:
-      - NTM_INTERFACE=${NTM_INTERFACE}
-    network_mode: host
-    restart: unless-stopped

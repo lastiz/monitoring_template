@@ -18,7 +18,6 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     extra_hosts:
-      - "traffic_monitor:$HOST_DOCKER_LOCAL_IP"
       - "node_exporter:$HOST_DOCKER_LOCAL_IP"
     restart: unless-stopped
 
@@ -48,14 +47,6 @@ services:
     devices:
       - /dev/kmsg
     privileged: true
-    restart: unless-stopped
-
-  network_traffic_metrics:
-    image: inzania/network-traffic-metrics:latest
-    container_name: network_traffic_metrics
-    environment:
-      - NTM_INTERFACE=${NTM_INTERFACE}
-    network_mode: host
     restart: unless-stopped
 
   # End of exporters
